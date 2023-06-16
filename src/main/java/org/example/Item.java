@@ -1,6 +1,6 @@
 package org.example;
 
-public class Item {
+public class Item implements Cloneable {
     private final String name;
     private final String model;
     protected final int price;
@@ -18,24 +18,27 @@ public class Item {
     protected void setQuantity(int quantity) {
         this.quantity = quantity;
     }
+
     protected int reduceQuantity(int difference) {
         this.quantity -= difference;
         return quantity;
     }
+
     protected int increaseQuantity(int summer) {
         this.quantity += summer;
         return quantity;
     }
 
     public int buyItem(int quantity) {
-        if(quantity > 0) {
+        if (quantity > 0) {
             this.quantity -= quantity;
-        return quantity;
+            return quantity;
         } else {
             System.out.println("There is empty");
             return quantity;
         }
     }
+
     public int addItem(int quantity) {
         this.quantity += quantity;
         return quantity;
@@ -76,7 +79,7 @@ public class Item {
     }
 
     public int getTotalRating() {
-        totalRating = ratingCounter/numberCounter;
+        totalRating = ratingCounter / numberCounter;
         return totalRating;
     }
 
@@ -91,5 +94,22 @@ public class Item {
                 ", quantity= " + quantity + " pcs" +
                 ", totalRating= " + totalRating +
                 '}';
+    }
+
+    @Override
+    public Item clone() {
+        try {
+            //Благодаря тому, что класс Item имплементирует интерфейс Cloneable, не изменяя какие-либо стандартные сущестувующие классы
+            Item clone = (Item) super.clone();
+            // TODO: copy mutable state here, so the clone can't change the internals of the original
+            return clone;
+        } catch (CloneNotSupportedException e) {
+            throw new AssertionError();
+        }
+    }
+
+    public boolean equals(Item item) {
+        if (item == null) return false;
+        return quantity == item.getQuantity();
     }
 }

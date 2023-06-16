@@ -1,19 +1,20 @@
 package org.example;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 public class Catalog {
     private static Catalog catalog = null;
+
     protected static Catalog getInstance() {
         if (catalog == null) catalog = new Catalog();
         return catalog;
     }
 
-    List<Item> itemList = new ArrayList<>();
-    List<Item> orderList = new ArrayList<>(itemList);
+
     int totalSum = 0;
     Item filtronOP595 = new ItemBuilder()
             .setName("Filtron")
@@ -50,7 +51,9 @@ public class Catalog {
             .setDaysOfDelivery(6)
             .setQuantity(3)
             .build();
+
     public List<Item> loadCatalog() {
+        List<Item> itemList = new ArrayList<>();
         itemList.add(filtronOP595);
         itemList.add(mannW6103);
         itemList.add(sakuraC1821);
@@ -58,13 +61,13 @@ public class Catalog {
         itemList.add(jsAsakashiC224J);
         return itemList;
     }
-    public List<Item> loadOrderList() {
-        orderList.add(filtronOP595);
-        orderList.add(mannW6103);
-        orderList.add(sakuraC1821);
-        orderList.add(sakuraC1823SBP);
-        orderList.add(jsAsakashiC224J);
-        //orderList.addAll(itemList);
+
+    public List<Item> loadOrderList(List<Item> list) {
+        List<Item> orderList = new ArrayList<>();
+        // Снизу выполняется принцип избегания магических чисел
+        for (int i = 0; i < list.size(); i++) {
+            orderList.add(list.get(i).clone());
+        }
         for (int i = 0; i < orderList.size(); i++) {
             orderList.get(i).setQuantity(0);
         }
@@ -74,96 +77,65 @@ public class Catalog {
         }
         return orderList;
     }
+
     public void showCatalog(List<Item> itemList) {
-        if(this.itemList == itemList) {
-            System.out.println("Welcome to our shop! We present to your attention high-quality oil filters:");
-            for (Item item : itemList) {
-                System.out.println(item.toString());
-            }
-            System.out.println();
-        } else {
-            if(itemList.isEmpty()) {
-                System.out.println("Your order list is empty");
-            } else {
-            System.out.println("Your order list:");
-            for (Item item : itemList) {
-                System.out.println(item.toString());
-            }
-                System.out.println("Your payment amount is " + totalSum);}
-        }
-
-        System.out.println();
-    }
-    public List<Item> filterCatalogByPrice(int a) {
-        Predicate<Item> byPrice = item -> item.getPrice() > a;
-        List<Item> filteredList = itemList.stream().filter(byPrice).collect(Collectors.toList());
-        for (Item item : filteredList) {
-            System.out.println(item.toString());
-        }
-        System.out.println();
-        return filteredList;
-    }
-    public List<Item> filterCatalogByDaysOfDelivery(int a) {
-        Predicate<Item> byDaysOfDelivery = item -> item.getDateOfDelivery() <= a;
-        List<Item> filteredList = itemList.stream().filter(byDaysOfDelivery).collect(Collectors.toList());
-        for (Item item : filteredList) {
-            System.out.println(item.toString());
-        }
-        System.out.println();
-        return filteredList;
-    }
-    public Item removeItemFromList(Item catalogItem, int num) {
-        catalogItem.reduceQuantity(num);
-        return catalogItem;
-    }
-    public Item addItemInList(Item catalogItem, int num){
-        catalogItem.increaseQuantity(num);
-
-        //itemList.get(a).reduceQuantity(b);
-        System.out.println("ItemList: ");
+        System.out.println("Welcome to our shop! We present to your attention high-quality oil filters:");
         for (Item item : itemList) {
             System.out.println(item.toString());
         }
         System.out.println();
+    }
 
-        //orderList.get(a).increaseQuantity(b);
-        System.out.println("OrderList: ");
-        for (Item item : orderList) {
+    public void showOrderList(List<Item> orderList) {
+        if (orderList.isEmpty()) {
+            System.out.println("Your order list is empty");
+        } else {
+            System.out.println("Your order list:");
+            for (Item item : orderList) {
+                System.out.println(item.toString());
+            }
+            for (Item item : orderList) {
+                totalSum += item.getPrice() * item.getQuantity();
+            }
+            System.out.println("Your payment amount is " + totalSum);
+        }
+    }
+
+    public List<Item> filterCatalogByPrice(List<Item> list, int a) {
+        Predicate<Item> byPrice = item -> item.getPrice() > a;
+        List<Item> filteredList = list.stream().filter(byPrice).collect(Collectors.toList());
+        for (Item item : filteredList) {
             System.out.println(item.toString());
         }
         System.out.println();
+        return filteredList;
+    }
 
+    public List<Item> filterCatalogByDaysOfDelivery(List<Item> list, int a) {
+        Predicate<Item> byDaysOfDelivery = item -> item.getDateOfDelivery() <= a;
+        List<Item> filteredList = list.stream().filter(byDaysOfDelivery).collect(Collectors.toList());
+        for (Item item : filteredList) {
+            System.out.println(item.toString());
+        }
+        System.out.println();
+        return filteredList;
+    }
 
+    public Item removeItemFromList(Item catalogItem, int num) {
+        if (catalogItem.getQuantity() < num) {
+            System.out.println("You can't buy such quantity!");
+        } else {
+            catalogItem.reduceQuantity(num);
+        }
+        return catalogItem;
 
+    }
 
-//        itemList.get(a).buyItem(b);
-//        if(!orderList.contains(a)) {
-//            orderList.add(itemList.get(a));
-//            orderList.get(a).setQuantity(b);
-//            totalSum = orderList.get(a).getPrice() * orderList.get(a).getQuantity();
-//        } else {
-//            orderList.get(a).addItem(b);
-//            for (int i = 0; i < orderList.size(); i++) {
-//                totalSum += orderList.get(i).getPrice() * orderList.get(i).getQuantity();
-//            }
-//        }
-        //return orderList;
+    public Item addItemInList(Item catalogItem, int num) {
+        catalogItem.increaseQuantity(num);
         return catalogItem;
     }
-//    public List<Item> deleteItemFromOrderList(int a, int b) {
-//        totalSum -= orderList.get(a).getPrice() * orderList.get(a).getQuantity();
-//        orderList.get(a).buyItem(b);
-//        if(orderList.get(a).getQuantity() == 0) {
-//            orderList.remove(a);
-//        }
-//
-//        return orderList;
-//    }
-    public List<Item> addRating() {
-        itemList.get(1).setRating(5);
-        itemList.get(1).getTotalRating();
-        return itemList;
-    }
+
     public List<Item> finishToBuyItems(List<Item> orderList) {
         if (orderList.isEmpty()) {
             System.out.println("Your order list is empty! Select the necessary oil filter");
